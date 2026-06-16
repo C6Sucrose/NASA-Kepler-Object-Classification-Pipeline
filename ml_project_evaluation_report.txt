@@ -1,0 +1,100 @@
+--- Machine Learning Evaluation Project Report ---
+
+This report details the steps taken in the `ml_project.py` script for a Machine Learning Evaluation Project, providing reasoning and discussing alternatives based on the attached lecture slides.
+
+**1. Data Loading**
+*   **What was done:** The `raw_dataset.csv` file was loaded using `pandas.read_csv` with `utf-7` encoding.
+*   **Reasoning (based on lectures):** Lecture 03a, Slide 13 states that "Good data: Is stored in a suitable format depending on dataset size and type." While `utf-7` encoding is a specific technical detail not explicitly covered, the general principle is to load the data correctly into a manipulable format.
+*   **Why alternatives were not used:** The lectures do not provide specific alternatives for handling file encoding issues during data loading.
+
+**2. Initial Data Exploration and Visualization**
+*   **What was done:**
+    *   A `visualizations` directory was created.
+    *   The distribution of the `koi_disposition` target variable was visualized using a count plot (`sns.countplot`).
+    *   Histograms and box plots for numerical features were prepared (some commented out in the provided code, but the intent is clear from the remaining code and comments).
+*   **Reasoning (based on lectures):** Lecture 03a, Slides 14-15 emphasize "Getting familiar with the data" as a crucial first step. It lists "Histograms, Boxplots, Scatter and line plots" and "Summary statistics on the data" as methods for problem reasoning and understanding the data. Visualizing the target distribution helps in understanding the problem (e.g., class imbalance).
+*   **Why alternatives were not used:** While other visualization methods like scatter plots are mentioned (Lecture 03a, Slide 15), the chosen plots (count plots, histograms, box plots) are directly recommended in the slides for initial data exploration. Pair plots were explicitly removed, likely due to the number of features making them unwieldy, which aligns with the idea of choosing methods that "illustrate the problem best" (Lecture 03a, Slide 15).
+
+**3. Data Cleaning and Preprocessing**
+
+    **a. Removal of Irrelevant Columns**
+    *   **What was done:** Columns such as `kepid`, `kepoi_name`, `kepler_name`, and `koi_tce_delivname` were identified and removed.
+    *   **Reasoning (based on lectures):** Lecture 11, Slide 11, under "Prepare the Data - Feature selection," suggests to "Drop the attributes that provide no useful information for the task." Additionally, Lecture 06, Slide 17, discusses "The curse of high dimensions," where increasing the number of features can increase the chances of overfitting. Removing irrelevant columns helps mitigate this.
+    *   **Why alternatives were not used:** For truly irrelevant columns, direct removal is the most appropriate action. More complex feature selection methods (like mRMR) are typically applied to potentially useful features, not those deemed entirely irrelevant from the outset.
+
+    **b. Conversion of Object Columns to Numeric**
+    *   **What was done:** Several columns initially identified as 'object' type (e.g., error columns, `koi_depth`) were converted to numeric using `pd.to_numeric` with `errors='coerce'`.
+    *   **Reasoning (based on lectures):** Machine learning algorithms generally require numerical input. Lecture 02, Slide 16, mentions that data points `x_ij` can be "Numbers, words, labels, boolean values," implying the need for data in a suitable format for processing. This conversion ensures that numerical features are correctly interpreted.
+    *   **Why alternatives were not used:** This is a fundamental data type conversion step. The lectures do not discuss specific alternatives for coercing non-numeric strings in numerical columns, but the general principle of preparing data for ML algorithms applies.
+
+    **c. Dropping Columns with High NaN Percentage**
+    *   **What was done:** Columns with more than 90% missing (NaN) values were dropped.
+    *   **Reasoning (based on lectures):** Lecture 11, Slide 11, under "Data cleaning," states, "Fill in missing values (e.g., with zero, mean, median. . . ) or drop their rows (or columns)." For columns with a very high percentage of missing data, dropping the column is a pragmatic choice to avoid losing a large portion of the dataset if rows were dropped, or introducing too much imputed (synthetic) data.
+    *   **Why alternatives were not used:** While filling missing values (imputation) is an alternative (Lecture 11, Slide 11), for columns that are almost entirely empty, imputation would largely create synthetic data, which might not be representative. The lecturer's discussion (Lecture 11, Slide 12) expresses caution about filling missing values unless their true value is known.
+
+    **d. Handling Remaining Missing Values by Removing Rows**
+    *   **What was done:** Any remaining rows containing missing values were removed using `df.dropna()`.
+    *   **Reasoning (based on lectures):** Lecture 11, Slide 11, explicitly lists "Fill in missing values... or drop their rows (or columns)" as a data cleaning step. Lecture 11, Slide 12, provides a strong opinion: "I’d never fill in missing values unless I’m 100% sure about their true value. Removing the rows/columns is most of the times the better choice." This approach prioritizes data integrity over retaining every sample.
+    *   **Why alternatives were not used:** Imputation (filling with mean, median, etc.) is the primary alternative (Lecture 11, Slide 11). However, the code adheres to the lecturer's stated preference against imputation unless the true value is certain, opting for row removal to ensure clean data for model training.
+
+    **e. Target Feature Encoding**
+    *   **What was done:** The categorical `koi_disposition` column was converted into numerical labels using `LabelEncoder`.
+    *   **Reasoning (based on lectures):** Supervised learning classification problems (Lecture 03a, Slide 18) involve predicting class labels. Machine learning algorithms typically require numerical input. While Lecture 06, Slide 4, discusses "One-hot code" for qualitative *features*, for a multi-class *target* variable, integer encoding (like Label Encoding) is a standard prerequisite for many classifiers.
+    *   **Why alternatives were not used:** One-hot encoding is more common for categorical *features* to avoid implying ordinality. For a target variable, Label Encoding is suitable and simpler, as the model's output layer can often handle integer labels directly. The lectures do not explicitly detail alternatives for target variable encoding.
+
+    **f. Separation of Features (X) and Target (y)**
+    *   **What was done:** The dataset was split into features (`X`) and the target variable (`y`).
+    *   **Reasoning (based on lectures):** This is a fundamental step in supervised learning, as formally defined in Lecture 02, Slide 16 ("Data: x_ij... prediction variable y_i") and Slide 17 ("We need to find an function/algorithm f(x_i), that computes a ŷ_i"). It clearly delineates the inputs for the model from the output to be predicted.
+    *   **Why alternatives were not used:** This is a definitional step for supervised learning and has no direct alternatives.
+
+**4. Data Splitting (Train, Validation, Test)**
+*   **What was done:** The data was split into training (70%), validation (15%), and test (15%) sets using `train_test_split` with `random_state=42` and `stratify=y`.
+*   **Reasoning (based on lectures):**
+    *   Lecture 03b, Slide 3, states the core reason: "To check if our classifier generalizes well, we train it on training data, but use a different test data set to compute the performance measures."
+    *   Lecture 03b, Slide 13, recommends a three-way split: "If you have enough data, you should split it into 3 subsets: Training data... Validation data... Test data." The validation set is specifically for "optimizing hyperparameters (e.g. the k in kNN, feature selection, model selection)."
+    *   Lecture 03b, Slide 10, emphasizes the "extremly (!) important general rule: Train and test data must have no (unnecessary) connection to each other!"
+    *   The use of `stratify=y` ensures that the proportion of classes is maintained in each split, which is good practice, especially for imbalanced datasets, aligning with the idea of having "sufficiently large" and representative datasets (Lecture 03b, Slide 10).
+*   **Why alternatives were not used:** Cross-validation (k-fold, LOOCV) is an alternative for data splitting, particularly for "small data sets" (Lecture 07, Slide 15). However, the choice of a direct 70/15/15 split implies that the dataset is considered large enough to provide sufficient samples for each subset, as discussed in Lecture 03b, Slide 10 ("If you have enough data...").
+
+**5. Feature Selection (mRMR)**
+*   **What was done:** The mRMR (minimum-redundancy-maximum-relevance) feature selection method was applied to select a subset of features (15 in this case) from the training data. It uses Mutual Information for relevance and Pearson Correlation for redundancy.
+*   **Reasoning (based on lectures):**
+    *   Lecture 06, Slide 17, highlights "The curse of high dimensions," where increasing features can lead to overfitting and worse generalization. Feature selection aims to mitigate this.
+    *   Lecture 06, Slide 24-25, specifically introduces and explains the mRMR criterion, which combines maximizing relevance to the target and minimizing redundancy among selected features.
+    *   Lecture 06, Slide 26, notes that "Statistics optimization is implemented in modules/libraries and can therefore be easily used."
+*   **Why alternatives were not used:** Lecture 06, Slide 20, lists other feature selection methods like "Brute force / Exhaustive search" and "Optimization algorithms that take the classifier into account" (e.g., Forward selection, Backward elimination). mRMR was chosen as a specific "Classifier/Regressor independent method that is based on statistics" (Lecture 06, Slide 20), which is suitable for pre-processing before model training. The lectures also warn against simply using correlation matrices for feature selection (Lecture 06, Slide 22-23).
+
+**6. Normalization/Scaling**
+*   **What was done:** Numerical features in the training, validation, and test sets were scaled using `StandardScaler`. The scaler was `fit` only on the training data and then `transform`ed on all three sets.
+*   **Reasoning (based on lectures):**
+    *   Lecture 03b, Slide 18, explains the necessity of feature normalization: "A feature that has a large standard deviation may overpower all other features in an L2 (euclidian) distance measurement. In addition, features with very large or very small numbers may lead to numerical instability in classification."
+    *   Lecture 03b, Slide 20, provides a critical rule: "You should never normalize train and test data together. Compute the mean and standard deviation on the training data alone, and apply these to both train and test (and validation) data." This prevents data leakage from the test/validation sets into the training process.
+*   **Why alternatives were not used:** `StandardScaler` normalizes features to 0-mean and standard deviation 1, which is the specific method described in Lecture 03b, Slide 18. Other scaling methods (e.g., Min-Max scaling) are not explicitly detailed as alternatives in the provided slides.
+
+**7. Final Visualization (Post-Scaling)**
+*   **What was done:** Histograms and box plots of the numerical features were generated again after scaling, specifically for the training data.
+*   **Reasoning (based on lectures):** This step serves to visually confirm the effect of the scaling process, ensuring that the distributions are indeed normalized as expected. It aligns with the general principle of "Getting familiar with the data" (Lecture 03a, Slide 14) and verifying preprocessing steps.
+*   **Why alternatives were not used:** This is a diagnostic visualization step. The lectures do not discuss alternatives for verifying scaling effects.
+
+**8. Algorithm Exploration, Training, and Optimization**
+*   **What was done:**
+    *   A set of "Base Classifiers" (KNeighborsClassifier, GaussianNB, LinearDiscriminantAnalysis) and "Advanced Classifiers" (SVC_Linear, SVC_RBF, DecisionTreeClassifier, RandomForestClassifier) were defined.
+    *   `GridSearchCV` was used for each classifier to find the best hyperparameters, fitting on the training data (`X_train`, `y_train`) and evaluating using `balanced_accuracy` with 3-fold cross-validation.
+    *   Models were evaluated on the validation set to select the best base and advanced classifiers.
+*   **Reasoning (based on lectures):**
+    *   Lecture 03a, Slide 7, states that during ML evaluation, one optimizes "The ML model" and "The parameters and hyperparameters of the model."
+    *   Lecture 09, Slide 4, explains that "Often, optimization problems cannot be solved analytically" and lists finding the best hyperparameters for kNN, SVM, and Random Forest as examples of such problems.
+    *   `GridSearchCV` performs an "Exhaustive search" or "Multilevel grid search" (Lecture 09, Slides 13-16), which are described as "simple black-box optimization methods" that can find a global minimum for discrete parameters or a fine grid.
+    *   The use of cross-validation within `GridSearchCV` for hyperparameter tuning is supported by Lecture 11, Slide 17: "Fine-tune the hyperparameters using cross-validation."
+    *   The selection of classifiers (kNN, Bayes, LDA, SVM, Decision Trees, Random Forests) directly corresponds to the classifiers discussed in lectures 03a, 04, and 08, adhering to the project rule to "only use the tools/methods that we discuss in the lecture" (Project Work Rules, Slide 20).
+    *   `balanced_accuracy_score` is used as the scoring metric. Lecture 03b, Slide 23, warns that "Accuracy" is "misleading" for unevenly distributed classes and suggests "classwise averaged classification rate" (Lecture 03b, Slide 27) as a valid alternative. Balanced accuracy is equivalent to the classwise averaged classification rate for binary classification and a generalization for multi-class, thus addressing the concern about imbalanced classes.
+*   **Why alternatives were not used:**
+    *   For hyperparameter optimization, "Monte Carlo search" (random search) and "Bayesian optimization" are mentioned as alternatives (Lecture 09, Slides 17, 30; Lecture 11, Slide 17). However, `GridSearchCV` (exhaustive grid search) is a common and effective method, especially when the hyperparameter space is not excessively large. The lectures suggest preferring random search over grid search if training is very long or there are many hyperparameters, but for the defined grids, grid search is a valid choice.
+    *   Other classifiers (e.g., Logistic Regression, Neural Networks, Boosting) are mentioned in the slides but are not explicitly part of the "base" or "advanced" classifiers chosen for this project, aligning with the instruction to stick to discussed methods.
+
+**9. Final Machine Learning Evaluation on Test Set**
+*   **What was done:** The best base classifier and best advanced classifier (selected based on validation set performance) were finally evaluated on the held-out test set. Training and test balanced accuracy, classification reports, and confusion matrices were generated.
+*   **Reasoning (based on lectures):** Lecture 03b, Slide 3, states that the test data is used "to compute the performance measures" to check for generalization. Lecture 03b, Slide 13, explicitly states: "Test data: Used for final prediction results. The test data should never be used for tasks that the validation data is for." This ensures an unbiased estimate of the model's performance on truly unseen data.
+*   **Why alternatives were not used:** This is the standard and critical final step in a machine learning evaluation to assess generalization performance. There are no alternatives for this specific purpose.
+
+---

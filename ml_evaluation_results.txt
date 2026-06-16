@@ -1,0 +1,55 @@
+--- Machine Learning Evaluation Results ---
+
+Dataset Shape after Cleaning: (4950, 36)
+Training set shape: (3465, 15), (3465,)
+Validation set shape: (742, 15), (742,)
+Test set shape: (743, 15), (743,)
+
+--- Best Classifiers Selected (based on Validation Balanced Accuracy) ---
+Best Base Classifier: GaussianNB
+Validation Balanced Accuracy: 0.8023
+
+Best Advanced Classifier: RandomForestClassifier
+Validation Balanced Accuracy: 0.8848
+
+
+--- Final Evaluation for Best Base Classifier (GaussianNB) ---
+Training Balanced Accuracy: 0.8135
+Test Balanced Accuracy: 0.7964
+Test AUC-ROC: 0.9177
+Test Classification Report:
+                precision    recall  f1-score   support
+
+     CANDIDATE       0.55      0.68      0.61       163
+     CONFIRMED       0.82      0.76      0.79       364
+FALSE POSITIVE       1.00      0.94      0.97       216
+
+      accuracy                           0.80       743
+     macro avg       0.79      0.80      0.79       743
+  weighted avg       0.81      0.80      0.80       743
+
+Test Confusion Matrix:
+[[111  51   1]
+ [ 86 278   0]
+ [  4   8 204]]
+
+
+--- Final Evaluation for Best Advanced Classifier (RandomForestClassifier) ---
+Training Balanced Accuracy: 0.9353
+Test Balanced Accuracy: 0.8774
+Test AUC-ROC: 0.9658
+Test Classification Report:
+                precision    recall  f1-score   support
+
+     CANDIDATE       0.74      0.77      0.75       163
+     CONFIRMED       0.90      0.88      0.89       364
+FALSE POSITIVE       0.98      0.99      0.98       216
+
+      accuracy                           0.89       743
+     macro avg       0.87      0.88      0.87       743
+  weighted avg       0.89      0.89      0.89       743
+
+Test Confusion Matrix:
+[[125  36   2]
+ [ 42 320   2]
+ [  2   1 213]]
